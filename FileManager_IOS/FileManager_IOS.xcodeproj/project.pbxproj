@@ -16,6 +16,7 @@
 		B4ED2729280679B600647525 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4ED2728280679B600647525 /* DocumentManager.swift */; };
 		B4ED272C2806C35100647525 /* DetailTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4ED272A2806C35100647525 /* DetailTableViewCell.swift */; };
 		B4ED272D2806C35100647525 /* DetailTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4ED272B2806C35100647525 /* DetailTableViewCell.xib */; };
+		B4FE2C8E28084D8800D84095 /* ImageDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FE2C8D28084D8800D84095 /* ImageDetail.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		B4ED2728280679B600647525 /* DocumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManager.swift; sourceTree = "<group>"; };
 		B4ED272A2806C35100647525 /* DetailTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewCell.swift; sourceTree = "<group>"; };
 		B4ED272B2806C35100647525 /* DetailTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DetailTableViewCell.xib; sourceTree = "<group>"; };
+		B4FE2C8D28084D8800D84095 /* ImageDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetail.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				B4ED2728280679B600647525 /* DocumentManager.swift */,
 				B4ED272A2806C35100647525 /* DetailTableViewCell.swift */,
 				B4ED272B2806C35100647525 /* DetailTableViewCell.xib */,
+				B4FE2C8D28084D8800D84095 /* ImageDetail.swift */,
 			);
 			path = FileManager_IOS;
 			sourceTree = "<group>";
@@ -147,6 +150,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4FE2C8E28084D8800D84095 /* ImageDetail.swift in Sources */,
 				B4ED271928065DDF00647525 /* ViewController.swift in Sources */,
 				B4ED271528065DDF00647525 /* AppDelegate.swift in Sources */,
 				B4ED2729280679B600647525 /* DocumentManager.swift in Sources */,

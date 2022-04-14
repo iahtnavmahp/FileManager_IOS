@@ -30,35 +30,91 @@ class DocumentManager {
     var dataDictionary: String = ""
     var manager = FileManager.default
     var lisImage: [UIImage] = []
-    var lisImgResult: [UIImage] = []
-    func getImageFromDocumentDirectory(completion: @escaping (Bool) -> Void) {
+    var lisImgResult: [ImageDetail] = []
+    
+    func deleteFileFromDocument(fileName: String) {
+        let pathFile = getDocumentFilePath(fileName: fileName)
+        
+        do {
+            try manager.removeItem(at: pathFile)
+            
+        } catch {
+            print("err deleteFileFromDocument")
+        }
+    }
+    
+    func deleteFileFromTemp(fileName: String) {
+        let pathFile = getTempFilePath(fileName: fileName)
+        
+        do {
+            try manager.removeItem(at: pathFile)
+            
+        } catch {
+            print("err deleteFileFromTemp")
+        }
+    }
+    func deleteImageFromDocument(idx: Int, tableView: UITableView) {
+        self.lisImgResult.remove(at: idx)
+        deleteFileFromDocument(fileName: "Images/image\(idx + 1).png")
+        tableView.reloadData()
+    }
+    
+    func getImageFromDocument(completion: @escaping (Bool) -> Void) {
         var count = 0
         DispatchQueue.global().async {
-            for i in 1...13 {
-                let imagePath = self.getDocumentFilePath(fileName: "Images/image\(i).png")
-  
+            for i in 1...12 {
+                let imageString = "image\(i).png"
+                let imagePath = self.getDocumentFilePath(fileName: "Images/" + imageString)
+                
                 do {
                     let imageData = try Data(contentsOf: imagePath)
                     if let img = UIImage(data: imageData) {
-                        self.lisImgResult.append(img)
+                        let resolution = "\(img.size.width) x \(img.size.height)"
+                        let imageDetail = ImageDetail(name: imageString, resolution: resolution, image: img)
+                        self.lisImgResult.append(imageDetail)
                         count += 1
-                        if count == 13 {
+                        if count == 12 {
                             completion(true)
                         }
                     }
                 } catch {
                     print(error.localizedDescription)
-                }
-                
-                
-                
-                
-                
-                
-                
-                
-                
+                    completion(false)
+                }                
             }
+        }
+    }
+    
+    func getAttributesOfItemDocuments(fileName: String) {
+        let fileSupperManPath = getDocumentFilePath(fileName: fileName).path
+        do {
+            let fileManager = FileManager.default
+            let attributes = try fileManager.attributesOfItem(atPath: fileSupperManPath)
+            print("File ReferenceCount: ")
+            if let referenceCount =  attributes[FileAttributeKey(rawValue: "NSFileReferenceCount" )] as? Int {
+                print(referenceCount)
+            }
+            //            for i in attributes {
+            //                print(i)
+            //            }
+            
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getAttributesOfItemTemp(fileName: String) {
+        let fileSupperManPath = getTempFilePath(fileName: fileName).path
+        do {
+            let fileManager = FileManager.default
+            let attributes = try fileManager.attributesOfItem(atPath: fileSupperManPath)
+            print("File Attributes: ")
+            for i in attributes {
+                print(i)
+            }
+            
+        } catch {
+            print(error.localizedDescription)
         }
     }
     
@@ -78,6 +134,7 @@ class DocumentManager {
                                 }
                             }catch {
                                 print(error.localizedDescription)
+                                completion(false)
                             }
                         }
                     }
@@ -92,13 +149,11 @@ class DocumentManager {
                 if let url = URL(string: i) {
                     let task = URLSession.shared.dataTask(with: url) { data, response, error in
                         guard let _ = data, error == nil else { return }
-                        DispatchQueue.main.async {
-                            if let image = UIImage(data: data!) {
-                                self.lisImage.append(image)
-                                count += 1
-                                if count == self.urlImg.count {
-                                    completion(true)
-                                }
+                        if let image = UIImage(data: data!) {
+                            self.lisImage.append(image)
+                            count += 1
+                            if count == self.urlImg.count {
+                                completion(true)
                             }
                         }
                     }
@@ -106,8 +161,6 @@ class DocumentManager {
                     task.resume()
                 }
             }
-            
-            
         }
     }
     
@@ -117,6 +170,11 @@ class DocumentManager {
         return documentsDirectory
     }
     
+    func getTempsDirectory() -> URL {
+        let tempDirectoryPath = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        return tempDirectoryPath
+    }
+    
     func getDocumentFilePath(fileName: String) -> URL {
         let documentPath = getDocumentsDirectory()
         let filePath = documentPath.appendingPathComponent(fileName)
@@ -124,8 +182,30 @@ class DocumentManager {
         return filePath
     }
     
-    func createForder(folderName: String) -> URL {
+    func getTempFilePath(fileName: String) -> URL {
+        let documentPath = getTempsDirectory()
+        let filePath = documentPath.appendingPathComponent(fileName)
+        return filePath
+    }
+    
+    func createForderDocumentsDirectory(folderName: String) -> URL {
         let rootFolderURL = getDocumentsDirectory()
+        let nestedFolderURL = rootFolderURL.appendingPathComponent(folderName)
+        if !manager.fileExists(atPath: nestedFolderURL.relativePath) {
+            do {
+                try manager.createDirectory(
+                    at: nestedFolderURL,
+                    withIntermediateDirectories: false,
+                    attributes: nil
+                )
+            }catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nestedFolderURL
+    }
+    func createForderTempDirectory(folderName: String) -> URL {
+        let rootFolderURL = getTempsDirectory()
         let nestedFolderURL = rootFolderURL.appendingPathComponent(folderName)
         if !manager.fileExists(atPath: nestedFolderURL.relativePath) {
             do {
@@ -142,13 +222,13 @@ class DocumentManager {
     }
     
     func readString(documentName: String) -> String {
-        let fileURL = createForder(folderName: "MyAppFiles").appendingPathComponent(documentName)
+        let fileURL = createForderDocumentsDirectory(folderName: "MyAppFiles").appendingPathComponent(documentName)
         if fileURL.checkFileExist() {
             do {
                 let data = try Data(contentsOf: fileURL)
                 return String(data: data, encoding: .utf8) ?? ""
             } catch {
-                print("Can not read file")
+                print("err readString")
                 return ""
             }
             
@@ -163,7 +243,7 @@ class DocumentManager {
                 let data = try Data(contentsOf: pathURL)
                 return String(data: data, encoding: .utf8) ?? ""
             } catch {
-                print("Can not read file")
+                print("err readString")
                 return ""
             }
             
@@ -174,20 +254,34 @@ class DocumentManager {
     }
     
     func writeString(dataSave: String, documentName: String) {
-        let fileURL = createForder(folderName: "MyAppFiles").appendingPathComponent(documentName)
+        let fileURL = createForderDocumentsDirectory(folderName: "MyAppFiles").appendingPathComponent(documentName)
         dataString = readString(pathURL: fileURL)
         dataString += dataSave
         do {
             try Data(dataString.utf8).write(to: fileURL)
             
         } catch {
-            print("Can not write file")
+            print("err writeString")
             
         }
         
     }
+    
+    func writeJson(dataSave: String, fileName: String) {
+        let fileURL = getTempsDirectory().appendingPathComponent(fileName)
+        
+        do {
+            try Data(dataSave.utf8).write(to: fileURL)
+            
+        } catch {
+            print("err writeJson")
+            
+        }
+        
+    }
+    
     func writeDictionary<T: Encodable>(dataSave: T, documentName: String) {
-        let fileURL = createForder(folderName: "MyAppFiles").appendingPathComponent(documentName)
+        let fileURL = createForderDocumentsDirectory(folderName: "MyAppFiles").appendingPathComponent(documentName)
         dataDictionary = readString(pathURL: fileURL)
         let encoder = JSONEncoder()
         if let jsonData = try? encoder.encode(dataSave) {
@@ -200,10 +294,42 @@ class DocumentManager {
             try Data(dataDictionary.utf8).write(to: fileURL)
             
         } catch {
-            print("Can not write file")
+            print("err writeDictionary")
             
         }
         
+    }
+    
+    func saveDataJsonToTemp() {
+        if let url = URL(string: "https://15a35941-b8c2-4d9f-a8a6-0bbd76865bc0.mock.pstmn.io/person") {
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                guard let _ = data, error == nil else { return }
+                let pathJson = self.getTempFilePath(fileName: "fileJson")
+                do {
+                    try data?.write(to: pathJson)
+                }catch {
+                    print("err getDataJsonToSever")
+                }
+            }
+            
+            task.resume()
+        }
+    }
+    func readDataJson() {
+        let filePath = getTempFilePath(fileName: "fileJson")
+        if filePath.checkFileExist() {
+            do {
+                let data = try Data(contentsOf: filePath)
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print(jsonString)
+                }
+                
+            }catch {
+                print("err readDataJson")
+            }
+        }else {
+            print("err readDataJson")
+        }
     }
     
 }

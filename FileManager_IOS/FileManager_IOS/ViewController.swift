@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-  
+    
     @IBOutlet weak var myTableView: UITableView!
     
     var dataSave: String = ""
@@ -16,23 +16,28 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       load()
+        load()
         configTableView()
-//        for i in 1...13 {
-//            print(fileIO.getDocumentFilePath(fileName: "Images/image\(i).png").checkFileExist())
-//        }
-//        let dic = [12:23]
-//        fileIO.writeDictionary(dataSave: dic, documentName: "dataDictionary.txt")
-//        print(fileIO.readString(documentName: "dataDictionary.txt"))
-//        let encoder = JSONEncoder()
-//        if let jsonData = try? encoder.encode(dic) {
-//            if let jsonString = String(data: jsonData, encoding: .utf8) {
-//                print(jsonString)
-//            }
-//        }
-//        fileIO.writeString(dataSave: "2706 ", documentName: "dataString.txt")
-//        print(fileIO.readString(documentName: "dataString.txt"))
-//        fileIO.writeString(dataSave: "thaisaker", documentName: "test.txt")
+        fileIO.readDataJson()
+
+//        fileIO.getAttributesOfItem(fileName: "Images")
+        //       load()
+        //        configTableView()
+        //        for i in 1...13 {
+        //            print(fileIO.getDocumentFilePath(fileName: "Images/image\(i).png").checkFileExist())
+        //        }
+        //        let dic = [12:23]
+        //        fileIO.writeDictionary(dataSave: dic, documentName: "dataDictionary.txt")
+        //        print(fileIO.readString(documentName: "dataDictionary.txt"))
+        //        let encoder = JSONEncoder()
+        //        if let jsonData = try? encoder.encode(dic) {
+        //            if let jsonString = String(data: jsonData, encoding: .utf8) {
+        //                print(jsonString)
+        //            }
+        //        }
+        //        fileIO.writeString(dataSave: "2706 ", documentName: "dataString.txt")
+        //        print(fileIO.readString(documentName: "dataString.txt"))
+        //        fileIO.writeString(dataSave: "thaisaker", documentName: "test.txt")
         //        let fileContent = "Custom Folder"
         //        let customFileName = "dataString.txt"
         //
@@ -41,32 +46,32 @@ class ViewController: UIViewController {
         //        } catch {
         //            print(error.localizedDescription)
         //        }
-//        let urlD = fileIO.getDocumentFilePath(fileName: "MyAppFiles/dataString.txt")
-//        var dataString: String = "clo clo"
-//        do {
-//            let data = try Data(contentsOf: urlD)
-//            dataSave = String(data: data, encoding: .utf8) ?? ""
-//            print("Content File: \(dataSave)")
-//        } catch {
-//            print(error.localizedDescription)
-//        }
-//        dataString += dataSave
-//        do {
-//            try Data(dataString.utf8).write(to: urlD)
-//
-//
-//        } catch {
-//            print("Can not write file")
-//
-//        }
-//
-//        do {
-//            let data = try Data(contentsOf: urlD)
-//            dataSave = String(data: data, encoding: .utf8) ?? ""
-//            print("Content File: \(dataSave)")
-//        } catch {
-//            print(error.localizedDescription)
-//        }
+        //        let urlD = fileIO.getDocumentFilePath(fileName: "MyAppFiles/dataString.txt")
+        //        var dataString: String = "clo clo"
+        //        do {
+        //            let data = try Data(contentsOf: urlD)
+        //            dataSave = String(data: data, encoding: .utf8) ?? ""
+        //            print("Content File: \(dataSave)")
+        //        } catch {
+        //            print(error.localizedDescription)
+        //        }
+        //        dataString += dataSave
+        //        do {
+        //            try Data(dataString.utf8).write(to: urlD)
+        //
+        //
+        //        } catch {
+        //            print("Can not write file")
+        //
+        //        }
+        //
+        //        do {
+        //            let data = try Data(contentsOf: urlD)
+        //            dataSave = String(data: data, encoding: .utf8) ?? ""
+        //            print("Content File: \(dataSave)")
+        //        } catch {
+        //            print(error.localizedDescription)
+        //        }
     }
     func configTableView(){
         let nib = UINib(nibName: "DetailTableViewCell", bundle: .main)
@@ -76,11 +81,11 @@ class ViewController: UIViewController {
     }
     
     func load(){
-        fileIO.getImageFromDocumentDirectory() {done in
+        fileIO.getImageFromDocument() {done in
             if done {
                 DispatchQueue.main.async {
-                    self.myTableView.reloadData()
-                }
+                    self.myTableView.reloadData() 
+                 }
             }
         }
     }
@@ -93,8 +98,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DetailTableViewCell", for: indexPath) as! DetailTableViewCell
-        cell.titleLabel?.text = "img\(indexPath.row)"
-        cell.avatarImg.image = fileIO.lisImgResult[indexPath.row]
+        cell.resolutionLabel?.text = fileIO.lisImgResult[indexPath.row].resolution
+        cell.titleLabel?.text = fileIO.lisImgResult[indexPath.row].name
+        cell.avatarImg.image = fileIO.lisImgResult[indexPath.row].image
         return cell
     }
 }

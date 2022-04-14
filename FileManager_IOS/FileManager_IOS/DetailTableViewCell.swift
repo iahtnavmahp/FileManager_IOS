@@ -11,6 +11,7 @@ class DetailTableViewCell: UITableViewCell {
     
     @IBOutlet weak var avatarImg: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var resolutionLabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
