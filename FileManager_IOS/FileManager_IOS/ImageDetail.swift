@@ -12,6 +12,7 @@ struct ImageDetail {
     var name: String
     var resolution: String
     var image: UIImage
+    
     init(name: String, resolution: String, image: UIImage) {
         self.name = name
         self.resolution = resolution

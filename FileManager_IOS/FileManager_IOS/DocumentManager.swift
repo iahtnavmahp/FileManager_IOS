@@ -29,7 +29,6 @@ class DocumentManager {
     var dataString: String = ""
     var dataDictionary: String = ""
     var manager = FileManager.default
-    var lisImage: [UIImage] = []
     var lisImgResult: [ImageDetail] = []
     
     func deleteFileFromDocument(fileName: String) {
@@ -53,6 +52,7 @@ class DocumentManager {
             print("err deleteFileFromTemp")
         }
     }
+    
     func deleteImageFromDocument(idx: Int, tableView: UITableView) {
         self.lisImgResult.remove(at: idx)
         deleteFileFromDocument(fileName: "Images/image\(idx + 1).png")
@@ -60,40 +60,47 @@ class DocumentManager {
     }
     
     func getImageFromDocument(completion: @escaping (Bool) -> Void) {
+        lisImgResult.removeAll()
         var count = 0
+        let idx = getAttributesOfItemDocuments(fileName: "Images") - 2
         DispatchQueue.global().async {
-            for i in 1...12 {
-                let imageString = "image\(i).png"
-                let imagePath = self.getDocumentFilePath(fileName: "Images/" + imageString)
-                
-                do {
-                    let imageData = try Data(contentsOf: imagePath)
-                    if let img = UIImage(data: imageData) {
-                        let resolution = "\(img.size.width) x \(img.size.height)"
-                        let imageDetail = ImageDetail(name: imageString, resolution: resolution, image: img)
-                        self.lisImgResult.append(imageDetail)
-                        count += 1
-                        if count == 12 {
-                            completion(true)
+            if idx > 0 {
+                for i in 1...idx {
+                    let imageString = "image\(i).png"
+                    let imagePath = self.getDocumentFilePath(fileName: "Images/" + imageString)
+                    
+                    do {
+                        let imageData = try Data(contentsOf: imagePath)
+                        if let img = UIImage(data: imageData) {
+                            let resolution = "\(img.size.width) x \(img.size.height)"
+                            let imageDetail = ImageDetail(name: imageString, resolution: resolution, image: img)
+                            self.lisImgResult.append(imageDetail)
+                            count += 1
+                            if count == idx {
+                                completion(true)
+                            }
                         }
+                    } catch {
+                        print(error.localizedDescription)
+                        completion(false)
                     }
-                } catch {
-                    print(error.localizedDescription)
-                    completion(false)
-                }                
+                }
             }
         }
     }
     
-    func getAttributesOfItemDocuments(fileName: String) {
+    func getAttributesOfItemDocuments(fileName: String) -> Int{
         let fileSupperManPath = getDocumentFilePath(fileName: fileName).path
         do {
             let fileManager = FileManager.default
             let attributes = try fileManager.attributesOfItem(atPath: fileSupperManPath)
-            print("File ReferenceCount: ")
+            
             if let referenceCount =  attributes[FileAttributeKey(rawValue: "NSFileReferenceCount" )] as? Int {
-                print(referenceCount)
+                print("NSFileReferenceCount: \(referenceCount)")
+                return referenceCount
+                
             }
+            
             //            for i in attributes {
             //                print(i)
             //            }
@@ -101,6 +108,7 @@ class DocumentManager {
         } catch {
             print(error.localizedDescription)
         }
+        return 0
     }
     
     func getAttributesOfItemTemp(fileName: String) {
@@ -118,44 +126,25 @@ class DocumentManager {
         }
     }
     
-    func saveImage(completion: @escaping (Bool) -> Void) {
-        getListImage() { done in
-            var count = 0
-            if done {
-                DispatchQueue.global().async {
-                    for (i,e) in self.lisImage.enumerated() {
-                        if let data = e.pngData() {
-                            let fileName = self.getDocumentFilePath(fileName: "Images").appendingPathComponent("image\(i+1).png")
-                            do {
-                                try data.write(to: fileName)
-                                count += 1
-                                if count == self.lisImage.count {
-                                    completion(true)
-                                }
-                            }catch {
-                                print(error.localizedDescription)
-                                completion(false)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
     func getListImage(completion: @escaping (Bool) -> Void) {
         var count = 0
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .userInitiated).async {
             for i in self.urlImg {
                 if let url = URL(string: i) {
                     let task = URLSession.shared.dataTask(with: url) { data, response, error in
                         guard let _ = data, error == nil else { return }
-                        if let image = UIImage(data: data!) {
-                            self.lisImage.append(image)
+                        let fileName = self.getDocumentFilePath(fileName: "Images").appendingPathComponent("image\(count+1).png")
+                        do {
+                            try data?.write(to: fileName)
                             count += 1
                             if count == self.urlImg.count {
                                 completion(true)
                             }
+                        }catch {
+                            print(error.localizedDescription)
+                            completion(false)
                         }
+                        
                     }
                     
                     task.resume()
@@ -204,6 +193,7 @@ class DocumentManager {
         }
         return nestedFolderURL
     }
+    
     func createForderTempDirectory(folderName: String) -> URL {
         let rootFolderURL = getTempsDirectory()
         let nestedFolderURL = rootFolderURL.appendingPathComponent(folderName)
@@ -283,20 +273,32 @@ class DocumentManager {
     func writeDictionary<T: Encodable>(dataSave: T, documentName: String) {
         let fileURL = createForderDocumentsDirectory(folderName: "MyAppFiles").appendingPathComponent(documentName)
         dataDictionary = readString(pathURL: fileURL)
-        let encoder = JSONEncoder()
-        if let jsonData = try? encoder.encode(dataSave) {
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print(jsonString)
-                dataDictionary += jsonString
+        if let dataString = dataSave as? String {
+            dataDictionary += dataString
+            do {
+                try Data(dataDictionary.utf8).write(to: fileURL)
+                
+            } catch {
+                print("err writeDictionary")
+                
+            }
+        }else {
+            let encoder = JSONEncoder()
+            if let jsonData = try? encoder.encode(dataSave) {
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    print(jsonString)
+                    dataDictionary += jsonString
+                }
+            }
+            do {
+                try Data(dataDictionary.utf8).write(to: fileURL)
+                
+            } catch {
+                print("err writeDictionary")
+                
             }
         }
-        do {
-            try Data(dataDictionary.utf8).write(to: fileURL)
-            
-        } catch {
-            print("err writeDictionary")
-            
-        }
+        
         
     }
     
@@ -315,6 +317,7 @@ class DocumentManager {
             task.resume()
         }
     }
+    
     func readDataJson() {
         let filePath = getTempFilePath(fileName: "fileJson")
         if filePath.checkFileExist() {
@@ -345,4 +348,8 @@ extension URL {
             return false;
         }
     }
+}
+
+protocol CheckReferenceDocumentDelegate {
+    func pushCountReference(idx: Int)
 }
