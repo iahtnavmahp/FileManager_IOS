@@ -43,6 +43,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B404915028092C7E003F6DC1 /* HomeView */ = {
+			isa = PBXGroup;
+			children = (
+				B4ED2728280679B600647525 /* DocumentManager.swift */,
+				B404914C280915A4003F6DC1 /* HomeViewController.swift */,
+				B404914D280915A4003F6DC1 /* HomeViewController.xib */,
+				B404915128092C8A003F6DC1 /* Cells */,
+			);
+			path = HomeView;
+			sourceTree = "<group>";
+		};
+		B404915128092C8A003F6DC1 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				B4ED272A2806C35100647525 /* DetailTableViewCell.swift */,
+				B4ED272B2806C35100647525 /* DetailTableViewCell.xib */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		B404915228092CA7003F6DC1 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				B4FE2C8D28084D8800D84095 /* ImageDetail.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		B4ED270828065DDF00647525 = {
 			isa = PBXGroup;
 			children = (
@@ -63,15 +91,11 @@
 			isa = PBXGroup;
 			children = (
 				B4ED271428065DDF00647525 /* AppDelegate.swift */,
+				B404915028092C7E003F6DC1 /* HomeView */,
+				B404915228092CA7003F6DC1 /* Model */,
 				B4ED271D28065DE100647525 /* Assets.xcassets */,
 				B4ED271F28065DE100647525 /* LaunchScreen.storyboard */,
 				B4ED272228065DE100647525 /* Info.plist */,
-				B4ED2728280679B600647525 /* DocumentManager.swift */,
-				B4ED272A2806C35100647525 /* DetailTableViewCell.swift */,
-				B4ED272B2806C35100647525 /* DetailTableViewCell.xib */,
-				B4FE2C8D28084D8800D84095 /* ImageDetail.swift */,
-				B404914C280915A4003F6DC1 /* HomeViewController.swift */,
-				B404914D280915A4003F6DC1 /* HomeViewController.xib */,
 			);
 			path = FileManager_IOS;
 			sourceTree = "<group>";

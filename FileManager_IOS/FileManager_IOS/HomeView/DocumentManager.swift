@@ -33,22 +33,18 @@ class DocumentManager {
     
     func deleteFileFromDocument(fileName: String) {
         let pathFile = getDocumentFilePath(fileName: fileName)
-        
         do {
             try manager.removeItem(at: pathFile)
-            
-        } catch {
+        }catch {
             print("err deleteFileFromDocument")
         }
     }
     
     func deleteFileFromTemp(fileName: String) {
         let pathFile = getTempFilePath(fileName: fileName)
-        
         do {
             try manager.removeItem(at: pathFile)
-            
-        } catch {
+        }catch {
             print("err deleteFileFromTemp")
         }
     }
@@ -63,12 +59,11 @@ class DocumentManager {
         lisImgResult.removeAll()
         var count = 0
         let idx = getAttributesOfItemDocuments(fileName: "Images") - 2
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .userInitiated).async {
             if idx > 0 {
                 for i in 1...idx {
                     let imageString = "image\(i).png"
                     let imagePath = self.getDocumentFilePath(fileName: "Images/" + imageString)
-                    
                     do {
                         let imageData = try Data(contentsOf: imagePath)
                         if let img = UIImage(data: imageData) {
@@ -80,7 +75,7 @@ class DocumentManager {
                                 completion(true)
                             }
                         }
-                    } catch {
+                    }catch {
                         print(error.localizedDescription)
                         completion(false)
                     }
@@ -94,18 +89,15 @@ class DocumentManager {
         do {
             let fileManager = FileManager.default
             let attributes = try fileManager.attributesOfItem(atPath: fileSupperManPath)
-            
             if let referenceCount =  attributes[FileAttributeKey(rawValue: "NSFileReferenceCount" )] as? Int {
                 print("NSFileReferenceCount: \(referenceCount)")
                 return referenceCount
-                
             }
             
             //            for i in attributes {
             //                print(i)
             //            }
-            
-        } catch {
+        }catch {
             print(error.localizedDescription)
         }
         return 0
@@ -120,19 +112,20 @@ class DocumentManager {
             for i in attributes {
                 print(i)
             }
-            
-        } catch {
+        }catch {
             print(error.localizedDescription)
         }
     }
-    
+
     func getListImage(completion: @escaping (Bool) -> Void) {
         var count = 0
         DispatchQueue.global(qos: .userInitiated).async {
             for i in self.urlImg {
                 if let url = URL(string: i) {
                     let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                        guard let _ = data, error == nil else { return }
+                        guard let _ = data, error == nil else {
+                            completion(false)
+                            return }
                         let fileName = self.getDocumentFilePath(fileName: "Images").appendingPathComponent("image\(count+1).png")
                         do {
                             try data?.write(to: fileName)
@@ -144,9 +137,7 @@ class DocumentManager {
                             print(error.localizedDescription)
                             completion(false)
                         }
-                        
                     }
-                    
                     task.resume()
                 }
             }
@@ -167,7 +158,6 @@ class DocumentManager {
     func getDocumentFilePath(fileName: String) -> URL {
         let documentPath = getDocumentsDirectory()
         let filePath = documentPath.appendingPathComponent(fileName)
-        
         return filePath
     }
     
@@ -185,8 +175,7 @@ class DocumentManager {
                 try manager.createDirectory(
                     at: nestedFolderURL,
                     withIntermediateDirectories: false,
-                    attributes: nil
-                )
+                    attributes: nil)
             }catch {
                 print(error.localizedDescription)
             }
@@ -217,12 +206,11 @@ class DocumentManager {
             do {
                 let data = try Data(contentsOf: fileURL)
                 return String(data: data, encoding: .utf8) ?? ""
-            } catch {
+            }catch {
                 print("err readString")
                 return ""
             }
-            
-        }else{
+        }else {
             return ""
         }
     }
@@ -236,11 +224,9 @@ class DocumentManager {
                 print("err readString")
                 return ""
             }
-            
-        }else{
+        }else {
             return ""
         }
-        
     }
     
     func writeString(dataSave: String, documentName: String) {
@@ -249,25 +235,18 @@ class DocumentManager {
         dataString += dataSave
         do {
             try Data(dataString.utf8).write(to: fileURL)
-            
-        } catch {
+        }catch {
             print("err writeString")
-            
         }
-        
     }
     
     func writeJson(dataSave: String, fileName: String) {
         let fileURL = getTempsDirectory().appendingPathComponent(fileName)
-        
         do {
             try Data(dataSave.utf8).write(to: fileURL)
-            
-        } catch {
+        }catch {
             print("err writeJson")
-            
         }
-        
     }
     
     func writeDictionary<T: Encodable>(dataSave: T, documentName: String) {
@@ -277,10 +256,8 @@ class DocumentManager {
             dataDictionary += dataString
             do {
                 try Data(dataDictionary.utf8).write(to: fileURL)
-                
-            } catch {
+            }catch {
                 print("err writeDictionary")
-                
             }
         }else {
             let encoder = JSONEncoder()
@@ -292,14 +269,10 @@ class DocumentManager {
             }
             do {
                 try Data(dataDictionary.utf8).write(to: fileURL)
-                
-            } catch {
+            }catch {
                 print("err writeDictionary")
-                
             }
         }
-        
-        
     }
     
     func saveDataJsonToTemp() {
@@ -313,7 +286,6 @@ class DocumentManager {
                     print("err getDataJsonToSever")
                 }
             }
-            
             task.resume()
         }
     }
@@ -326,7 +298,6 @@ class DocumentManager {
                 if let jsonString = String(data: data, encoding: .utf8) {
                     print(jsonString)
                 }
-                
             }catch {
                 print("err readDataJson")
             }
@@ -334,7 +305,6 @@ class DocumentManager {
             print("err readDataJson")
         }
     }
-    
 }
 
 extension URL {
@@ -343,7 +313,7 @@ extension URL {
         if (FileManager.default.fileExists(atPath: path))   {
             print("FILE AVAILABLE")
             return true
-        }else        {
+        }else {
             print("FILE NOT AVAILABLE")
             return false;
         }
